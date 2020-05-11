@@ -1,0 +1,95 @@
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+<script>
+
+	(async function main(){
+		var data = parseDirectory();
+		bootstrapify();
+		generateMarkup(data);
+		initDatatable();
+	})();
+
+	function initDatatable(){
+		$('table').DataTable({
+			paging: false
+		});
+	}
+
+	function generateMarkup(data){
+		var buffer = [];
+		buffer.push(`<div class="container">
+			<br><br>
+			<h1><i class="fas fa-sitemap"></i> Index of: ${data.directory}</h1>
+			<table class="table table-bordered table-sm">
+				<thead>
+					<tr>
+						<th>File Name</th>
+						<th>Last Modified</th>
+					</tr>
+				</thead>
+				<tbody>
+					${generateDirectoryRows(data.contents)}
+				</tbody>
+			</table>
+		</div>`);
+		document.body.insertAdjacentHTML('afterbegin', buffer.join(''));
+	}
+
+	function generateDirectoryRows(files){
+		return files.map(file=>`<tr>
+			<td>
+				<a href='${file.href}'><img src='${file.src}' alt='${file.alt}'> ${file.title}</a>
+			</td>
+			<td>${file.date} ${file.time}</td>
+		</tr>`).join('');
+	}
+
+	function bootstrapify(){
+		document.body.querySelectorAll("*").forEach(ele=>{
+			if(ele.tagName !== 'SCRIPT') ele.remove();
+		});
+		appendElementTo('link', {
+			rel:"stylesheet", 
+			href:"https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css", 
+			integrity:"sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T", 
+			crossorigin:"anonymous"
+		}, '', document.head);
+		appendElementTo('meta', {charset:"utf-8"}, '', document.head);
+		appendElementTo('meta', {name:"viewport", content:"width=device-width, initial-scale=1, shrink-to-fit=no"}, '', document.head);
+		appendElementTo('link', {rel:"stylesheet",href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"}, '', document.head);
+		appendElementTo('link', {rel:"stylesheet",href:"https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"}, '', document.head);
+	}
+
+	function appendElementTo(tagName, attributes={}, innerHTML='', appendToEle=null){
+		var ele = document.createElement(tagName);
+		if(attributes) Object.keys(attributes).forEach(k=>ele.setAttribute(k, attributes[k]));
+		if(innerHTML) ele.innerHTML = innerHTML;
+		if(appendToEle) appendToEle.appendChild(ele);
+		return ele;
+	}
+
+	function parseDirectory(){
+		var directory_name = document.getElementsByTagName('h1').item(0).innerText.substring(9);
+		var pre = document.getElementsByTagName('pre').item(0);
+		var innerText = pre.innerHTML.substring(pre.innerHTML.indexOf('<hr>')+4)
+		var data = {
+			directory: directory_name,
+			contents: []
+		};
+		var re = /<img src="(.*)" alt="(.*)"> <a href="(.*)">(.*)<\/a>\s*(\d{4}-\d{2}-\d*) (\d{2}:\d{2})\s*([^\s]*.*)/g;
+		var match = re.exec(innerText);
+		while (match != null) {
+			let [full, src, alt, href, title, date, time] = match;
+			data.contents.push({src, alt, href, title, date, time});
+			match = re.exec(innerText);
+		}
+		return data;
+	}
+
+</script>
+</body>
+</html>

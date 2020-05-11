@@ -7,6 +7,7 @@
 </Files>
 
 <IfModule mod_autoindex.c>
+	IndexIgnore .CustomDirectoryIndex/
 	IndexOptions IgnoreCase FancyIndexing FoldersFirst NameWidth=* DescriptionWidth=* SuppressHTMLPreamble
 	IndexOrderDefault Descending Name
 	ReadmeName .CustomDirectoryIndex/footer.html

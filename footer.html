@@ -4,18 +4,42 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/js/all.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+<script src=".CustomDirectoryIndex/protodate.min.js"></script>
 <script>
+
+	document.body.style.display = 'none';
 
 	(async function main(){
 		var data = parseDirectory();
 		bootstrapify();
 		generateMarkup(data);
 		initDatatable();
+		document.body.style.display = null;
+		$('input[type="search"]').focus();
 	})();
 
 	function initDatatable(){
 		$('table').DataTable({
-			paging: false
+			paging: false,
+			columnDefs: [{ 
+				targets: [0]
+			},{ 
+				targets: [1],
+				render: (data, type, row, meta)=>{
+					var date = new Date(...data.split(/[^\d]/g));
+					switch(type){
+						case "type":
+						case "sort":
+							return date.getTime();
+							break;
+						case "filter":
+						case "display":
+							return date.format("M jS, Y")+"<br><small>"+date.format("h:i a")+"</small>";
+							break;
+					}
+					return data;
+				}
+			}]
 		});
 	}
 
@@ -24,7 +48,7 @@
 		buffer.push(`<div class="container">
 			<br><br>
 			<h1><i class="fas fa-sitemap"></i> Index of: ${data.directory}</h1>
-			<table class="table table-bordered table-sm">
+			<table class="table table-bordered table-sm table-striped table-hover">
 				<thead>
 					<tr>
 						<th>File Name</th>
@@ -62,6 +86,7 @@
 		appendElementTo('meta', {name:"viewport", content:"width=device-width, initial-scale=1, shrink-to-fit=no"}, '', document.head);
 		appendElementTo('link', {rel:"stylesheet",href:"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css"}, '', document.head);
 		appendElementTo('link', {rel:"stylesheet",href:"https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css"}, '', document.head);
+		appendElementTo('style', {}, `table.dataTable tbody td {vertical-align: middle;}`, document.head)
 	}
 
 	function appendElementTo(tagName, attributes={}, innerHTML='', appendToEle=null){

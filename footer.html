@@ -41,6 +41,12 @@
 				}
 			}]
 		});
+		$("div.dataTables_filter input").keyup( function (e) {
+			if (e.keyCode != 13) return;
+			if(!$(".filter-results").length) return;
+			var link = $(".filter-results")[0].href;
+			location.href = link;
+		});
 	}
 
 	function generateMarkup(data){
@@ -66,7 +72,7 @@
 	function generateDirectoryRows(files){
 		return files.map(file=>`<tr>
 			<td>
-				<a href='${file.href}'><img src='${file.src}' alt='${file.alt}'> ${file.title}</a>
+				<a href='${file.href}' class='filter-results'><img src='${file.src}' alt='${file.alt}'> ${file.title}</a>
 			</td>
 			<td>${file.date} ${file.time}</td>
 		</tr>`).join('');

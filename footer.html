@@ -41,12 +41,6 @@
 				}
 			}]
 		});
-		$("div.dataTables_filter input").keyup( function (e) {
-			if (e.keyCode != 13) return;
-			if(!$(".filter-results").length) return;
-			var link = $(".filter-results")[0].href;
-			location.href = link;
-		});
 	}
 
 	function generateMarkup(data){
@@ -72,7 +66,7 @@
 	function generateDirectoryRows(files){
 		return files.map(file=>`<tr>
 			<td>
-				<a href='${file.href}' class='filter-results'><img src='${file.src}' alt='${file.alt}'> ${file.title}</a>
+				<a href='${file.href}'>${file.src ? `<img src='${file.src}' alt='${file.alt}'>` : ``} ${file.title}</a>
 			</td>
 			<td>${file.date} ${file.time}</td>
 		</tr>`).join('');
@@ -111,10 +105,10 @@
 			directory: directory_name,
 			contents: []
 		};
-		var re = /<img src="(.*)" alt="(.*)"> <a href="(.*)">(.*)<\/a>\s*(\d{4}-\d{2}-\d*) (\d{2}:\d{2})\s*([^\s]*.*)/g;
+		var re = /(<img src="(.*)" alt="(.*)">)? <a href="(.*)">(.*)<\/a>\s*(\d{4}-\d{2}-\d*) (\d{2}:\d{2})\s*([^\s]*.*)/g;
 		var match = re.exec(innerText);
 		while (match != null) {
-			let [full, src, alt, href, title, date, time] = match;
+			let [full, img, src, alt, href, title, date, time] = match;
 			data.contents.push({src, alt, href, title, date, time});
 			match = re.exec(innerText);
 		}
